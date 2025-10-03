@@ -1,58 +1,36 @@
-name: CI - YouTube ELT Pipeline
+name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_HOST: ${{ secrets.POSTGRES_CONN_HOST }}
-          POSTGRES_PORT: ${{ secrets.POSTGRES_CONN_PORT }}
-          POSTGRES_USER: ${{ secrets.ELT_DATABASE_USERNAME }}
-          POSTGRES_PASSWORD: ${{ secrets.ELT_DATABASE_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.ELT_DATABASE_NAME }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U ${{ secrets.POSTGRES_USER }}"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
-      POSTGRES_CONN_HOST: localhost
-      POSTGRES_CONN_PORT: 5432
-      ELT_DATABASE_USERNAME: ${{ secrets.POSTGRES_USER }}
-      ELT_DATABASE_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      ELT_DATABASE_NAME: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_CONN_HOST: ${{ secrets.POSTGRES_CONN_HOST }}
+      POSTGRES_CONN_PORT: ${{ secrets.POSTGRES_CONN_PORT }}
+      ELT_DATABASE_USERNAME: ${{ secrets.ELT_DATABASE_USERNAME }}
+      ELT_DATABASE_PASSWORD: ${{ secrets.ELT_DATABASE_PASSWORD }}
+      ELT_DATABASE_NAME: ${{ secrets.ELT_DATABASE_NAME }}
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.12
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
 
-    - name: Run unit tests
-      run: |
-        pytest tests/unit -v -s
-
-    - name: Run integration tests
-      run: |
-        pytest tests/integration -v -s
+      - name: Run tests
+        run: |
+          pytest tests/ -v -s
