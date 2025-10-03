@@ -17,32 +17,41 @@ jobs:
       ELT_DATABASE_NAME: ${{ secrets.ELT_DATABASE_NAME }}
 
     steps:
+      # 1️⃣ Récupérer le code
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Installer Python et Astro CLI
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.11
 
-      - name: Install project dependencies
+      - name: Install Astro CLI
+        run: |
+          curl -sSL https://install.astronomer.io | sudo bash
+
+      # 3️⃣ Installer les dépendances Python
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
 
-      - name: Prepare Soda Core configs
+      # 4️⃣ Lancer un container Astro pour exécuter les tests Airflow
+      - name: Run tests in Astro container
         run: |
-          mkdir -p $GITHUB_WORKSPACE/include/quality
-          cp -n include/quality/* $GITHUB_WORKSPACE/include/quality/ || true
-
-      - name: Initialize Airflow for tests
-        run: |
-          export AIRFLOW_HOME=$(pwd)/airflow_home
-          mkdir -p $AIRFLOW_HOME
-          airflow db init
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
-
-      - name: Run tests
-        run: |
-          pytest tests/ -v -s
+          # Démarrer le container Astro en mode détaché
+          astro dev start -d
+          
+          # Attendre que Airflow soit prêt
+          sleep 20
+          
+          # Exécuter les tests unitaires Python
+          docker exec -w /usr/local/airflow/workspace $(docker ps -q -f name=astro-dev) pytest tests/unit -v -s
+          
+          # Exécuter les tests d'intégration DAG/Soda si nécessaire
+          docker exec -w /usr/local/airflow/workspace $(docker ps -q -f name=astro-dev) pytest tests/integration -v -s
+          
+          # Arrêter le container après tests
+          astro dev stop
