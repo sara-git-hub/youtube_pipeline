@@ -30,6 +30,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
+          pip install apache-airflow soda-core psycopg[binary]  # Ajoute Airflow et Soda Core
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:${GITHUB_WORKSPACE}/include" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
