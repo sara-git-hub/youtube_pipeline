@@ -49,12 +49,13 @@ def scan():
 
     # Initialisation de Soda Core avec les fichiers de config copiés dans le workspace
     scan = Scan(
-        data_source_name="core",
-        data_source_type="postgres",
-        data_source_connection_string=conn_str,
-        config_file_path="include/quality/configuration.yml",
-        checks_file_path="include/quality/soda_checks.yml"
+    data_source_name="core",
+    data_source_type="postgres",
+    data_source_connection_string=conn_str,
+    config_file_path="include/quality/configuration.yml",
+    checks_file_path="include/quality/soda_checks.yml"
     )
+
     return scan
 
 

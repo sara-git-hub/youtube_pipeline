@@ -32,9 +32,7 @@ jobs:
           pip install pytest
 
       - name: Prepare Soda Core configs
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/include/quality
-          cp include/quality/*.yml $GITHUB_WORKSPACE/include/quality/
+        run: mkdir -p $GITHUB_WORKSPACE/include/quality
 
       - name: Run tests
         run: |
