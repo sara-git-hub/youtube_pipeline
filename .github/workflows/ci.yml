@@ -30,9 +30,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
+          pip install apache-airflow==2.7.1
+          pip install soda-core
+
+      - name: Set PYTHONPATH
+        run: |
+          echo "PYTHONPATH=$GITHUB_WORKSPACE/youtube_pipeline:$PYTHONPATH" >> $GITHUB_ENV
 
       - name: Prepare Soda Core configs
-        run: mkdir -p $GITHUB_WORKSPACE/include/quality
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/include/quality
+          cp -n include/quality/configuration.yml $GITHUB_WORKSPACE/include/quality/configuration.yml || true
+          cp -n include/quality/soda_checks.yml $GITHUB_WORKSPACE/include/quality/soda_checks.yml || true
 
       - name: Run tests
         run: |
