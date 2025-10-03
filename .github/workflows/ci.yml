@@ -5,10 +5,13 @@ on:
     branches:
       - main
   pull_request:
+    branches:
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     env:
       POSTGRES_CONN_HOST: ${{ secrets.POSTGRES_CONN_HOST }}
       POSTGRES_CONN_PORT: ${{ secrets.POSTGRES_CONN_PORT }}
@@ -29,11 +32,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
-          pip install apache-airflow soda-core psycopg[binary]  # Ajoute Airflow et Soda Core
+          # Installer Airflow et le provider PostgreSQL si pas déjà dans requirements.txt
+          pip install "apache-airflow==2.7.1" apache-airflow-providers-postgres
+          # Installer Soda Core si tu l’utilises pour les tests
+          pip install soda-core
 
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$PYTHONPATH:${GITHUB_WORKSPACE}/include" >> $GITHUB_ENV
+      - name: Copy Soda Core configuration files
+        run: |
+          mkdir -p /usr/local/airflow/include/quality
+          cp include/quality/*.yml /usr/local/airflow/include/quality/
 
       - name: Run tests
         run: |
