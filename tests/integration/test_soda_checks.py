@@ -2,27 +2,31 @@ import pytest
 from soda.scan import Scan
 import os
 from airflow.models import Variable
-
 @pytest.fixture
 def scan():
-    # Charger les variables directement depuis Airflow
+    """
+    Fixture pour créer un Scan Soda Core
+    en injectant les variables d'environnement définies dans GitHub Actions.
+    """
     env_vars = {
-        "POSTGRES_CONN_HOST": Variable.get("POSTGRES_CONN_HOST"),
-        "POSTGRES_CONN_PORT": Variable.get("POSTGRES_CONN_PORT"),
-        "ELT_DATABASE_USERNAME": Variable.get("ELT_DATABASE_USERNAME"),
-        "ELT_DATABASE_PASSWORD": Variable.get("ELT_DATABASE_PASSWORD"),
-        "ELT_DATABASE_NAME": Variable.get("ELT_DATABASE_NAME"),
+        "POSTGRES_CONN_HOST": os.environ.get("POSTGRES_CONN_HOST"),
+        "POSTGRES_CONN_PORT": os.environ.get("POSTGRES_CONN_PORT"),
+        "ELT_DATABASE_USERNAME": os.environ.get("ELT_DATABASE_USERNAME"),
+        "ELT_DATABASE_PASSWORD": os.environ.get("ELT_DATABASE_PASSWORD"),
+        "ELT_DATABASE_NAME": os.environ.get("ELT_DATABASE_NAME"),
     }
-    
-    os.environ.update(env_vars)  # Met à jour les variables pour Soda Scan
 
-    base_path = "/usr/local/airflow/include/quality"
+    # Injection dans l'environnement
+    for k, v in env_vars.items():
+        os.environ[k] = v
+
     scan = Scan()
+    base_path = "/usr/local/airflow/include/quality"
     scan.set_data_source_name("postgres_youtube")
     scan.add_configuration_yaml_file(os.path.join(base_path, "configuration.yml"))
     scan.add_sodacl_yaml_file(os.path.join(base_path, "soda_checks.yml"))
-    return scan
 
+    return scan
 
 def test_soda_scan_runs(scan):
     """Vérifie que le scan s'exécute sans erreur système"""
