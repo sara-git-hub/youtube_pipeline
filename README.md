@@ -10,12 +10,7 @@ Pipeline ETL pour extraire, transformer et charger des données YouTube dans Pos
 
 - [Description](#description)  
 - [Architecture](#architecture)  
-- [Prérequis](#prérequis)  
-- [Installation](#installation)  
-- [Configuration](#configuration)  
-- [Utilisation](#utilisation)  
-- [Tests](#tests)  
-- [Contribuer](#contribuer)  
+- [Prérequis](#prérequis)   
 
 ---
 
