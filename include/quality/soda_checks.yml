@@ -1,0 +1,73 @@
+# ==========================================================
+# Checks Qualité des données - YouTube (staging & core)
+# ==========================================================
+
+# ---------------- STAGING ----------------
+checks for staging.youtube_videos_raw:
+  - row_count > 0:
+      name: "La table youtube_videos_raw doit contenir des données"
+
+  - missing_count(video_id) = 0:
+      name: "video_id ne doit pas être null"
+  - missing_count(title) = 0:
+      name: "title ne doit pas être null"
+  - missing_count(published_at) = 0:
+      name: "published_at ne doit pas être null"
+  - missing_count(extraction_date) = 0:
+      name: "extraction_date ne doit pas être null"
+
+  - min(view_count) >= 0:
+      name: "view_count ne doit pas être négatif"
+  - min(like_count) >= 0:
+      name: "like_count ne doit pas être négatif"
+  - min(comment_count) >= 0:
+      name: "comment_count ne doit pas être négatif"
+
+# ---------------- CORE ----------------
+checks for core.youtube_videos:
+  - row_count > 0:
+      name: "La table youtube_videos doit contenir des données"
+
+  - missing_count(video_id) = 0:
+      name: "video_id ne doit pas être null"
+  - duplicate_count(video_id) = 0:
+      name: "video_id doit être unique"
+  - missing_count(title) = 0:
+      name: "title ne doit pas être null"
+
+  - min(duration_seconds) >= 0:
+      name: "duration_seconds doit être positif"
+  - max(duration_seconds) <= 90000:
+      name: "duration_seconds ne doit pas dépasser 25h (plausibilité)"
+
+  - missing_count(published_at) = 0:
+      name: "published_at doit être un timestamp valide"
+
+  - min(view_count) >= 0:
+      name: "view_count ne doit pas être négatif"
+  - min(like_count) >= 0:
+      name: "like_count ne doit pas être négatif"
+  - min(comment_count) >= 0:
+      name: "comment_count ne doit pas être négatif"
+
+  - min(engagement_ratio) >= 0:
+      name: "engagement_ratio doit être ≥ 0"
+  - max(engagement_ratio) <= 1:
+      name: "engagement_ratio doit être ≤ 1"
+
+  - max_length(title) <= 200:
+      name: "title doit avoir une longueur raisonnable (≤200 caractères)"
+
+# ---------------- HISTORIQUE ----------------
+checks for core.youtube_videos_history:
+  - row_count > 0:
+      name: "La table youtube_videos_history doit contenir des données"
+  - missing_count(video_id) = 0:
+      name: "video_id ne doit pas être null"
+
+  - min(view_count) >= 0:
+      name: "view_count ne doit pas être négatif"
+  - min(like_count) >= 0:
+      name: "like_count ne doit pas être négatif"
+  - min(comment_count) >= 0:
+      name: "comment_count ne doit pas être négatif"

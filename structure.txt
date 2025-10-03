@@ -1,0 +1,27 @@
+youtube_ELT_pipeline/
+├── dags/
+│   ├── produce_json.py           # Extraction YouTube API
+│   ├── update_db.py              # ETL vers PostgreSQL
+│   ├── data_quality.py           # Validation Soda Core
+│   └── data/                     # Données locales (volumes Astro)
+├── include/                      # Modules réutilisables (recommandé Astro)
+│   ├── youtube/
+│   │   ├── __init__.py
+│   │   └── extractor.py
+│   └── quality/
+│       ├── __init__.py
+│       ├── configuration.yml
+│       └── soda_checks.yml      # ← Fichier YML des checks
+├── plugins/                      # Plugins Airflow personnalisés
+└── tests/
+│    ├── unit/
+│    │   └── test_extractor.py       # Tests sur include/youtube/extractor.py
+│    ├── integration/
+│    │   ├── test_dag_execution.py   # Vérifie DAGs + dépendances
+│    │   └── test_soda_checks.py     # Test Soda Core CLI mocké
+│    └── __init__.py
+├── sql/                          # Scripts SQL
+├── Dockerfile
+├── requirements.txt
+├── packages.txt
+└── airflow_settings.yaml
