@@ -2,12 +2,35 @@ import pytest
 from soda.scan import Scan
 import os
 from airflow.models import Variable
+
+
+'''@pytest.fixture
+def scan():
+    # Charger les variables directement depuis Airflow
+    env_vars = {
+        "POSTGRES_CONN_HOST": Variable.get("POSTGRES_CONN_HOST"),
+        "POSTGRES_CONN_PORT": Variable.get("POSTGRES_CONN_PORT"),
+        "ELT_DATABASE_USERNAME": Variable.get("ELT_DATABASE_USERNAME"),
+        "ELT_DATABASE_PASSWORD": Variable.get("ELT_DATABASE_PASSWORD"),
+        "ELT_DATABASE_NAME": Variable.get("ELT_DATABASE_NAME"),
+    }
+    
+    os.environ.update(env_vars)  # Met à jour les variables pour Soda Scan
+
+    base_path = "/usr/local/airflow/include/quality"
+    scan = Scan()
+    scan.set_data_source_name("postgres_youtube")
+    scan.add_configuration_yaml_file(os.path.join(base_path, "configuration.yml"))
+    scan.add_sodacl_yaml_file(os.path.join(base_path, "soda_checks.yml"))
+    return scan'''
+
+import pytest
+from airflow.models import Variable
+from soda.scan import Scan
+
 @pytest.fixture
 def scan():
-    """
-    Fixture pour créer un Scan Soda Core
-    en injectant les variables d'environnement définies dans GitHub Actions.
-    """
+    # Charger les variables depuis l'environnement GitHub Actions
     env_vars = {
         "POSTGRES_CONN_HOST": os.environ.get("POSTGRES_CONN_HOST"),
         "POSTGRES_CONN_PORT": os.environ.get("POSTGRES_CONN_PORT"),
@@ -16,17 +39,24 @@ def scan():
         "ELT_DATABASE_NAME": os.environ.get("ELT_DATABASE_NAME"),
     }
 
-    # Injection dans l'environnement
-    for k, v in env_vars.items():
-        os.environ[k] = v
+    conn_str = (
+        f"postgresql://{env_vars['ELT_DATABASE_USERNAME']}:"
+        f"{env_vars['ELT_DATABASE_PASSWORD']}@"
+        f"{env_vars['POSTGRES_CONN_HOST']}:"
+        f"{env_vars['POSTGRES_CONN_PORT']}/"
+        f"{env_vars['ELT_DATABASE_NAME']}"
+    )
 
-    scan = Scan()
-    base_path = "/usr/local/airflow/include/quality"
-    scan.set_data_source_name("postgres_youtube")
-    scan.add_configuration_yaml_file(os.path.join(base_path, "configuration.yml"))
-    scan.add_sodacl_yaml_file(os.path.join(base_path, "soda_checks.yml"))
-
+    # Initialisation de Soda Core avec les fichiers de config copiés dans le workspace
+    scan = Scan(
+        data_source_name="core",
+        data_source_type="postgres",
+        data_source_connection_string=conn_str,
+        config_file_path="include/quality/configuration.yml",
+        checks_file_path="include/quality/soda_checks.yml"
+    )
     return scan
+
 
 def test_soda_scan_runs(scan):
     """Vérifie que le scan s'exécute sans erreur système"""
