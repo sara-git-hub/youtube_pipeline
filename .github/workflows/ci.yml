@@ -34,6 +34,7 @@ jobs:
           # Installer le reste des dépendances
           pip install -r requirements.txt
           pip install pytest
+          pip install soda-core
 
       - name: Prepare Soda Core configs
         run: mkdir -p $GITHUB_WORKSPACE/include/quality
